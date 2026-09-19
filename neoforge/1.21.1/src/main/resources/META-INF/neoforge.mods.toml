@@ -8,6 +8,9 @@ version = "${version}"
 displayName = "Just Brightness"
 description = "Toggle a fullbright-style gamma override on demand."
 
+[[mixins]]
+config="justbrightness.mixins.json"
+
 [[dependencies.justbrightness]]
 modId = "neoforge"
 type = "required"

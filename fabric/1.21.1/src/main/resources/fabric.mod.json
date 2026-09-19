@@ -16,5 +16,8 @@
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}"
-  }
+  },
+  "mixins": [
+    "justbrightness.mixins.json"
+  ]
 }

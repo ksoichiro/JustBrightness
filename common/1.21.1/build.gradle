@@ -12,6 +12,12 @@ sourceSets.main {
     }
 }
 
+dependencies {
+    // Mixin annotations only; both fabric and neoforge already provide a Mixin
+    // implementation at runtime (this project only needs the API to compile).
+    compileOnly 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'
+}
+
 configurations {
     commonJava {
         canBeConsumed = true
