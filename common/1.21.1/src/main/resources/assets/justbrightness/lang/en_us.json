@@ -4,5 +4,6 @@
   "key.categories.justbrightness": "Just Brightness",
   "justbrightness.config.title": "Just Brightness",
   "justbrightness.config.gamma": "Gamma: %s",
-  "justbrightness.config.default_enabled": "Enabled by Default"
+  "justbrightness.config.default_enabled": "Enabled by Default",
+  "justbrightness.config.reset": "Reset to Default"
 }

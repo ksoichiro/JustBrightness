@@ -10,6 +10,8 @@ import net.minecraft.network.chat.Component;
 
 public class ConfigScreen extends Screen {
     private final Screen parent;
+    private GammaSlider gammaSlider;
+    private CycleButton<Boolean> defaultEnabledButton;
 
     public ConfigScreen(Screen parent) {
         super(Component.translatable("justbrightness.config.title"));
@@ -21,16 +23,30 @@ public class ConfigScreen extends Screen {
         double range = BrightnessConfig.MAX_GAMMA - BrightnessConfig.MIN_GAMMA;
         double initialProgress = (BrightnessConfig.getGamma() - BrightnessConfig.MIN_GAMMA) / range;
 
-        addRenderableWidget(new GammaSlider(width / 2 - 100, height / 2 - 36, 200, 20, initialProgress));
+        gammaSlider = addRenderableWidget(
+                new GammaSlider(width / 2 - 100, height / 2 - 36, 200, 20, initialProgress));
 
-        addRenderableWidget(CycleButton.onOffBuilder(BrightnessConfig.isDefaultEnabled())
+        defaultEnabledButton = addRenderableWidget(CycleButton.onOffBuilder(BrightnessConfig.isDefaultEnabled())
                 .create(width / 2 - 100, height / 2 - 12, 200, 20,
                         Component.translatable("justbrightness.config.default_enabled"),
                         (button, value) -> BrightnessConfig.setDefaultEnabled(value)));
 
-        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
+        addRenderableWidget(Button.builder(Component.translatable("justbrightness.config.reset"),
+                        button -> resetToDefaults())
                 .bounds(width / 2 - 100, height / 2 + 12, 200, 20)
                 .build());
+
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
+                .bounds(width / 2 - 100, height / 2 + 36, 200, 20)
+                .build());
+    }
+
+    private void resetToDefaults() {
+        double range = BrightnessConfig.MAX_GAMMA - BrightnessConfig.MIN_GAMMA;
+        double defaultProgress = (BrightnessConfig.DEFAULT_GAMMA - BrightnessConfig.MIN_GAMMA) / range;
+        gammaSlider.setProgress(defaultProgress);
+        defaultEnabledButton.setValue(false);
+        BrightnessConfig.setDefaultEnabled(false);
     }
 
     @Override
@@ -64,6 +80,12 @@ public class ConfigScreen extends Screen {
             double gamma = BrightnessConfig.MIN_GAMMA
                     + value * (BrightnessConfig.MAX_GAMMA - BrightnessConfig.MIN_GAMMA);
             BrightnessConfig.setGamma(gamma);
+        }
+
+        void setProgress(double progress) {
+            this.value = progress;
+            updateMessage();
+            applyValue();
         }
     }
 }

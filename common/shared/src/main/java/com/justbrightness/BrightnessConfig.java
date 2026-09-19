@@ -48,6 +48,7 @@ public final class BrightnessConfig {
     public static void load(Path configDir) {
         configFile = configDir.resolve(FILE_NAME);
         if (!Files.exists(configFile)) {
+            save();
             return;
         }
         try (Reader reader = Files.newBufferedReader(configFile)) {
