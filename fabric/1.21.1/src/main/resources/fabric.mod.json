@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "Just Brightness",
   "description": "Toggle a fullbright-style gamma override on demand.",
+  "icon": "assets/justbrightness/icon.png",
   "authors": [],
   "license": "LGPL-3.0-only",
   "environment": "client",

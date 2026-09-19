@@ -7,6 +7,7 @@ modId = "justbrightness"
 version = "${version}"
 displayName = "Just Brightness"
 description = "Toggle a fullbright-style gamma override on demand."
+iconFile = "assets/justbrightness/icon.png"
 
 [[mixins]]
 config="justbrightness.mixins.json"
