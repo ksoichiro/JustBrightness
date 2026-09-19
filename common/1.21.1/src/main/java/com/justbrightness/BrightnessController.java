@@ -3,6 +3,7 @@ package com.justbrightness;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class BrightnessController {
@@ -31,6 +32,14 @@ public class BrightnessController {
     public static void handleTick() {
         while (TOGGLE_KEY.consumeClick()) {
             BrightnessState.toggle();
+            if (BrightnessConfig.isToggleMessageEnabled()) {
+                Minecraft.getInstance().gui.setOverlayMessage(
+                        BrightnessState.isEnabled()
+                                ? Component.translatable("justbrightness.message.enabled",
+                                        String.format("%.1f", BrightnessConfig.getGamma()))
+                                : Component.translatable("justbrightness.message.disabled"),
+                        false);
+            }
         }
         while (OPEN_CONFIG_KEY.consumeClick()) {
             Minecraft.getInstance().setScreen(new ConfigScreen(null));

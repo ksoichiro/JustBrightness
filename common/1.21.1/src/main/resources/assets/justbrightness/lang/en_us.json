@@ -5,5 +5,8 @@
   "justbrightness.config.title": "Just Brightness",
   "justbrightness.config.gamma": "Gamma: %s",
   "justbrightness.config.default_enabled": "Enabled by Default",
+  "justbrightness.config.show_toggle_message": "Show Toggle Message",
+  "justbrightness.message.enabled": "Brightness: ON (Gamma %s)",
+  "justbrightness.message.disabled": "Brightness: OFF",
   "justbrightness.config.reset": "Reset to Default"
 }

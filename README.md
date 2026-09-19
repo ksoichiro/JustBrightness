@@ -17,7 +17,8 @@ Please follow the rules of every multiplayer server you join.
 
 - Toggle enhanced brightness instantly with a configurable keybind, `B` by default
 - Choose the gamma value used while enhanced brightness is enabled, from 1.0 to 32.0
-- Choose whether enhanced brightness starts enabled when joining a world
+- Enhanced brightness starts enabled when joining a world, and can be changed in settings
+- Show or hide the temporary action-bar message displayed after a toggle
 - Open the in-game settings screen from a separate, unbound keybind
 - Rebind both keys in Minecraft's standard Controls screen
 - No runtime dependencies beyond NeoForge

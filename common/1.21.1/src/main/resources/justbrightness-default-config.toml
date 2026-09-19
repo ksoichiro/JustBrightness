@@ -9,4 +9,7 @@ schema_version = 1
 gamma = 16.0
 
 # Whether enhanced brightness should be enabled by default when entering a world.
-default_enabled = false
+default_enabled = true
+
+# Whether to show an action bar message when enhanced brightness is toggled.
+show_toggle_message = true

@@ -3,6 +3,7 @@ package com.justbrightness;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class BrightnessController {
@@ -40,6 +41,14 @@ public class BrightnessController {
     public static void handleTick() {
         while (TOGGLE_KEY.consumeClick()) {
             BrightnessState.toggle();
+            if (BrightnessConfig.isToggleMessageEnabled()) {
+                Minecraft.getInstance().gui.hud.setOverlayMessage(
+                        BrightnessState.isEnabled()
+                                ? Component.translatable("justbrightness.message.enabled",
+                                        String.format("%.1f", BrightnessConfig.getGamma()))
+                                : Component.translatable("justbrightness.message.disabled"),
+                        false);
+            }
         }
         while (OPEN_CONFIG_KEY.consumeClick()) {
             // MC 26.x removed Minecraft#setScreen(Screen); setScreenAndShow is the

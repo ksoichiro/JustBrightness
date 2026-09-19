@@ -12,6 +12,7 @@ public class ConfigScreen extends Screen {
     private final Screen parent;
     private GammaSlider gammaSlider;
     private CycleButton<Boolean> defaultEnabledButton;
+    private CycleButton<Boolean> toggleMessageButton;
 
     public ConfigScreen(Screen parent) {
         super(Component.translatable("justbrightness.config.title"));
@@ -31,13 +32,18 @@ public class ConfigScreen extends Screen {
                         Component.translatable("justbrightness.config.default_enabled"),
                         (button, value) -> BrightnessConfig.setDefaultEnabled(value)));
 
+        toggleMessageButton = addRenderableWidget(CycleButton.onOffBuilder(BrightnessConfig.isToggleMessageEnabled())
+                .create(width / 2 - 100, height / 2 + 12, 200, 20,
+                        Component.translatable("justbrightness.config.show_toggle_message"),
+                        (button, value) -> BrightnessConfig.setToggleMessageEnabled(value)));
+
         addRenderableWidget(Button.builder(Component.translatable("justbrightness.config.reset"),
                         button -> resetToDefaults())
-                .bounds(width / 2 - 100, height / 2 + 12, 200, 20)
+                .bounds(width / 2 - 100, height / 2 + 36, 200, 20)
                 .build());
 
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
-                .bounds(width / 2 - 100, height / 2 + 36, 200, 20)
+                .bounds(width / 2 - 100, height / 2 + 60, 200, 20)
                 .build());
     }
 
@@ -45,8 +51,10 @@ public class ConfigScreen extends Screen {
         double range = BrightnessConfig.MAX_GAMMA - BrightnessConfig.MIN_GAMMA;
         double defaultProgress = (BrightnessConfig.DEFAULT_GAMMA - BrightnessConfig.MIN_GAMMA) / range;
         gammaSlider.setProgress(defaultProgress);
-        defaultEnabledButton.setValue(false);
-        BrightnessConfig.setDefaultEnabled(false);
+        defaultEnabledButton.setValue(BrightnessConfig.DEFAULT_ENABLED);
+        BrightnessConfig.setDefaultEnabled(BrightnessConfig.DEFAULT_ENABLED);
+        toggleMessageButton.setValue(BrightnessConfig.DEFAULT_SHOW_TOGGLE_MESSAGE);
+        BrightnessConfig.setToggleMessageEnabled(BrightnessConfig.DEFAULT_SHOW_TOGGLE_MESSAGE);
     }
 
     // MC 26.x screens no longer draw immediately via GuiGraphics#render; they collect a

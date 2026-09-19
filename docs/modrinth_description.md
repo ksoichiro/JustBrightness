@@ -16,7 +16,9 @@ brightness setting.
 
 - Press `B` by default to toggle enhanced brightness
 - Set the gamma used while enabled, from 1.0 to 32.0
-- Choose whether enhanced brightness is enabled automatically when entering a world
+- Enhanced brightness and the toggle message are enabled by default
+- Choose whether enhanced brightness starts automatically when entering a world
+- Show or hide the temporary action-bar message after a toggle
 - Rebind the toggle key in the standard **Options → Controls** screen
 - Bind a separate **Open Settings** key to configure the mod in game
 - Client-side only, with no runtime dependencies beyond NeoForge

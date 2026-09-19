@@ -18,6 +18,8 @@ public final class BrightnessConfig {
     public static final double MIN_GAMMA = 1.0;
     public static final double MAX_GAMMA = 32.0;
     public static final double DEFAULT_GAMMA = 16.0;
+    public static final boolean DEFAULT_ENABLED = true;
+    public static final boolean DEFAULT_SHOW_TOGGLE_MESSAGE = true;
 
     private static final String FILE_NAME = "justbrightness.toml";
     private static final String DEFAULT_CONFIG_RESOURCE = "/justbrightness-default-config.toml";
@@ -25,7 +27,8 @@ public final class BrightnessConfig {
 
     private static Path configFile;
     private static double gamma = DEFAULT_GAMMA;
-    private static boolean defaultEnabled = false;
+    private static boolean defaultEnabled = DEFAULT_ENABLED;
+    private static boolean showToggleMessage = DEFAULT_SHOW_TOGGLE_MESSAGE;
 
     private BrightnessConfig() {
     }
@@ -44,6 +47,14 @@ public final class BrightnessConfig {
 
     public static void setDefaultEnabled(boolean value) {
         defaultEnabled = value;
+    }
+
+    public static boolean isToggleMessageEnabled() {
+        return showToggleMessage;
+    }
+
+    public static void setToggleMessageEnabled(boolean value) {
+        showToggleMessage = value;
     }
 
     public static void load(Path configDir) {
@@ -66,10 +77,17 @@ public final class BrightnessConfig {
             } else if (defaultEnabledValue != null) {
                 LOGGER.warn("Invalid default_enabled = {} in {}; using default", defaultEnabledValue, FILE_NAME);
             }
+            Object showToggleMessageValue = parsed.get("show_toggle_message");
+            if (showToggleMessageValue instanceof Boolean bool) {
+                showToggleMessage = bool;
+            } else if (showToggleMessageValue != null) {
+                LOGGER.warn("Invalid show_toggle_message = {} in {}; using default", showToggleMessageValue, FILE_NAME);
+            }
         } catch (IOException | RuntimeException e) {
             LOGGER.warn("Failed to read {}; using defaults", FILE_NAME, e);
             gamma = DEFAULT_GAMMA;
-            defaultEnabled = false;
+            defaultEnabled = DEFAULT_ENABLED;
+            showToggleMessage = DEFAULT_SHOW_TOGGLE_MESSAGE;
         }
     }
 
@@ -102,6 +120,7 @@ public final class BrightnessConfig {
                 fileConfig.set("schema_version", CURRENT_SCHEMA_VERSION);
                 fileConfig.set("gamma", gamma);
                 fileConfig.set("default_enabled", defaultEnabled);
+                fileConfig.set("show_toggle_message", showToggleMessage);
                 fileConfig.save();
             }
         } catch (IOException | RuntimeException e) {
