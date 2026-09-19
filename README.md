@@ -1,33 +1,65 @@
 # Just Brightness
 
-A lightweight client-side mod that lets you toggle a fullbright-style gamma override on demand — supports Fabric and NeoForge.
+Just Brightness is a lightweight client-side brightness toggle for Minecraft.
 
-## Supported Versions
+Press a key to apply your preferred gamma value while playing. It does not change
+the brightness setting saved by Minecraft, so turning it off returns rendering to
+your usual vanilla brightness setting.
 
-| Minecraft | Fabric | NeoForge |
-|-----------|--------|----------|
-| 1.21.1    | Yes    | Yes      |
-| 26.3      | Yes    | Yes      |
+## Initial Release
 
-## Build
+The initial public release supports **Minecraft 26.3 with NeoForge**.
 
-Build a specific platform for a target Minecraft version using `-Ptarget_mc_version`:
+It is client-side only. Install it on the client, not on a dedicated server.
+Please follow the rules of every multiplayer server you join.
 
+## Features
+
+- Toggle enhanced brightness instantly with a configurable keybind, `B` by default
+- Choose the gamma value used while enhanced brightness is enabled, from 1.0 to 32.0
+- Choose whether enhanced brightness starts enabled when joining a world
+- Open the in-game settings screen from a separate, unbound keybind
+- Rebind both keys in Minecraft's standard Controls screen
+- No runtime dependencies beyond NeoForge
+
+## Installation
+
+1. Install [NeoForge](https://neoforged.net/) for Minecraft 26.3.
+2. Download the NeoForge 26.3 release from CurseForge or Modrinth.
+3. Place the JAR file in the instance's `mods` folder.
+4. Start Minecraft.
+
+## Usage
+
+- Press `B` to toggle enhanced brightness. Change this key in **Options → Controls → Just Brightness**.
+- Bind **Open Settings** in the same Controls category to open the configuration screen.
+- Select a gamma value and choose whether it should be enabled by default when entering a world.
+
+The configuration is stored in `config/justbrightness.toml`.
+
+## Compatibility
+
+Just Brightness changes the client renderer's gamma value only. It does not add
+content, communicate with servers, or modify worlds. Shader packs can handle
+lighting independently, so the visible result may differ by shader pack.
+
+## Building from Source
+
+This repository uses a Git submodule (`gradle/shared`) for shared Gradle scripts.
+Initialize it after cloning:
+
+```bash
+git clone --recurse-submodules https://github.com/ksoichiro/JustBrightness.git
 ```
-./gradlew :fabric:build -Ptarget_mc_version=1.21.1
-./gradlew :neoforge:build -Ptarget_mc_version=1.21.1
-./gradlew :fabric:build -Ptarget_mc_version=26.3
+
+Build the initial release target:
+
+```bash
 ./gradlew :neoforge:build -Ptarget_mc_version=26.3
 ```
 
-The default `target_mc_version` is `1.21.1` (defined in `gradle.properties`), so the following also works:
-
-```
-./gradlew :fabric:build
-```
-
-Build outputs are located in `<platform>/<mc_version>/build/libs/` (e.g. `fabric/1.21.1/build/libs/`).
+The JAR is written to `neoforge/26.3/build/libs/`.
 
 ## License
 
-LGPL-3.0-only
+[LGPL-3.0-only](COPYING.LESSER)
