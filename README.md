@@ -7,6 +7,7 @@ A lightweight client-side mod that lets you toggle a fullbright-style gamma over
 | Minecraft | Fabric | NeoForge |
 |-----------|--------|----------|
 | 1.21.1    | Yes    | Yes      |
+| 26.3      | Yes    | Yes      |
 
 ## Build
 
@@ -15,6 +16,8 @@ Build a specific platform for a target Minecraft version using `-Ptarget_mc_vers
 ```
 ./gradlew :fabric:build -Ptarget_mc_version=1.21.1
 ./gradlew :neoforge:build -Ptarget_mc_version=1.21.1
+./gradlew :fabric:build -Ptarget_mc_version=26.3
+./gradlew :neoforge:build -Ptarget_mc_version=26.3
 ```
 
 The default `target_mc_version` is `1.21.1` (defined in `gradle.properties`), so the following also works:
