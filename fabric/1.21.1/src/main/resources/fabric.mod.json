@@ -10,6 +10,9 @@
   "entrypoints": {
     "client": [
       "com.justbrightness.fabric.JustBrightnessFabric"
+    ],
+    "modmenu": [
+      "com.justbrightness.fabric.JustBrightnessModMenu"
     ]
   },
   "depends": {

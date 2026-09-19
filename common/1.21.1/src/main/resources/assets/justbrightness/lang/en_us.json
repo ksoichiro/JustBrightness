@@ -1,5 +1,8 @@
 {
   "key.justbrightness.toggle": "Toggle Brightness",
   "key.justbrightness.open_config": "Open Settings",
-  "key.categories.justbrightness": "Just Brightness"
+  "key.categories.justbrightness": "Just Brightness",
+  "justbrightness.config.title": "Just Brightness",
+  "justbrightness.config.gamma": "Gamma: %s",
+  "justbrightness.config.default_enabled": "Enabled by Default"
 }

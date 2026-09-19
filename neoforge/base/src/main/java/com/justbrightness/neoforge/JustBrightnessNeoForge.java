@@ -9,6 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -19,6 +20,9 @@ public class JustBrightnessNeoForge {
 
     public JustBrightnessNeoForge(ModContainer container) {
         BrightnessConfig.load(FMLPaths.CONFIGDIR.get());
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            JustBrightnessNeoForgeClient.registerConfigScreen(container);
+        }
     }
 
     @EventBusSubscriber(modid = JustBrightness.MOD_ID, value = Dist.CLIENT)
