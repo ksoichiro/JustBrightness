@@ -12,8 +12,10 @@ pluginManagement {
     plugins {
         if (targetVer.startsWith('1.')) {
             id 'fabric-loom' version settings.providers.gradleProperty('fabric_loom_version').get()
+            id 'net.minecraftforge.gradle' version settings.providers.gradleProperty('forgegradle_version').get()
         } else {
             id 'net.fabricmc.fabric-loom' version settings.providers.gradleProperty('fabric_loom_26_version').get()
+            id 'net.minecraftforge.gradle' version settings.providers.gradleProperty('forgegradle_version').get()
         }
     }
 }

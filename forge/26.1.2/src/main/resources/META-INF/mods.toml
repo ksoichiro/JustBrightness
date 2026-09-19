@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[64,)"
+license = "LGPL-3.0-only"
+
+[[mods]]
+modId = "justbrightness"
+version = "${version}"
+displayName = "Just Brightness"
+description = "Toggle a fullbright-style gamma override on demand."
+iconFile = "assets/justbrightness/icon.png"
+
+[[mixins]]
+config="justbrightness.mixins.json"
+
+[[dependencies.justbrightness]]
+modId = "forge"
+mandatory = true
+versionRange = "[64,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.justbrightness]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}, 27)"
+ordering = "NONE"
+side = "CLIENT"

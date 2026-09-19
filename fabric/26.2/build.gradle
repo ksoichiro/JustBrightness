@@ -1,0 +1,62 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+configurations {
+    commonJava {
+        canBeResolved = true
+    }
+    commonResources {
+        canBeResolved = true
+    }
+}
+
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases' }
+}
+
+dependencies {
+    // Loom for MC 26.x does not remap, so the plain configurations are used here
+    // instead of modImplementation/modCompileOnly.
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    compileOnly project(':common')
+    // Fabric doesn't ship night-config (unlike NeoForge), so bundle it into the jar.
+    implementation "com.electronwill.night-config:core:${night_config_version}"
+    include "com.electronwill.night-config:core:${night_config_version}"
+    implementation "com.electronwill.night-config:toml:${night_config_version}"
+    include "com.electronwill.night-config:toml:${night_config_version}"
+
+    if (project.hasProperty('modmenu_version')) {
+        compileOnly "com.terraformersmc:modmenu:${modmenu_version}"
+    }
+
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+sourceSets.main {
+    java {
+        srcDir rootProject.file('common/shared/src/main/java')
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+
+tasks.named('processResources') {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+
+    filesMatching('fabric.mod.json') {
+        expand(
+            version: mod_version,
+            minecraft_version: minecraft_version,
+            fabric_loader_version: fabric_loader_version,
+        )
+    }
+}
