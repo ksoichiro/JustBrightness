@@ -1,0 +1,44 @@
+plugins {
+    id 'net.neoforged.moddev' version "${moddevgradle_version}" apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    if (project.name.endsWith('-base')) {
+        layout.buildDirectory.set(file("${projectDir}/build/${project.property('target_mc_version')}"))
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(java_version as int)
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = java_version as int
+    }
+
+    repositories {
+        maven { url = 'https://libraries.minecraft.net/' }
+        mavenCentral()
+    }
+
+    afterEvaluate {
+        if (!project.name.endsWith('-base') && project.name != 'common') {
+            base {
+                archivesName = "${mod_id}-${mod_version}+${minecraft_version}-${project.name}"
+            }
+        }
+    }
+}
+
+if (!file('gradle/shared/multi-version-tasks.gradle').exists()) {
+    throw new GradleException(
+        "Shared Gradle scripts not found. Run: git submodule update --init"
+    )
+}
+apply from: 'gradle/shared/multi-version-tasks.gradle'
+apply from: 'gradle/shared/release-modrinth.gradle'
+apply from: 'gradle/shared/release-curseforge.gradle'
