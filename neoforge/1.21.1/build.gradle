@@ -30,6 +30,9 @@ configurations {
 dependencies {
     compileOnly project(':common')
     compileOnly project(':neoforge-base')
+    // NeoForge ships night-config at runtime, so this is compile-classpath only.
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
+    compileOnly "com.electronwill.night-config:toml:${night_config_version}"
 
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')

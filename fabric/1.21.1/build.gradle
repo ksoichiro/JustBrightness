@@ -23,6 +23,9 @@ dependencies {
 
     compileOnly project(':common')
     compileOnly project(':fabric-base')
+    // Fabric doesn't ship night-config (unlike NeoForge), so bundle it into the jar.
+    modImplementation include("com.electronwill.night-config:core:${night_config_version}")
+    modImplementation include("com.electronwill.night-config:toml:${night_config_version}")
 
     if (project.hasProperty('modmenu_version')) {
         modCompileOnly "com.terraformersmc:modmenu:${modmenu_version}"

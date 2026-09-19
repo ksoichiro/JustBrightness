@@ -16,6 +16,8 @@ dependencies {
     // Mixin annotations only; both fabric and neoforge already provide a Mixin
     // implementation at runtime (this project only needs the API to compile).
     compileOnly 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
+    compileOnly "com.electronwill.night-config:toml:${night_config_version}"
 }
 
 configurations {
