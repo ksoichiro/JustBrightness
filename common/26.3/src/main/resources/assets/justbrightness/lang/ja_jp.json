@@ -1,0 +1,8 @@
+{
+  "key.justbrightness.toggle": "明るさを切り替え",
+  "key.justbrightness.open_config": "設定を開く",
+  "key.category.justbrightness.justbrightness": "Just Brightness",
+  "justbrightness.config.title": "Just Brightness",
+  "justbrightness.config.gamma": "ガンマ値: %s",
+  "justbrightness.config.default_enabled": "デフォルトで有効"
+}
