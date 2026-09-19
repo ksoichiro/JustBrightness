@@ -35,6 +35,22 @@ Build a specific platform for a target Minecraft version:
 does not exist, so adding version-specific entry points automatically opts that version out
 of the shared base.
 
+### Entry-point duplication (manual sync required)
+
+Because 26.3 needs its own copies of the shared entry points (see API table below), these
+four files exist in two locations each and must be kept in sync by hand — there is no
+automated check:
+
+- `JustBrightnessFabric.java`: `fabric/base/src/main/java/com/justbrightness/fabric/` and `fabric/26.3/src/main/java/com/justbrightness/fabric/`
+- `JustBrightnessModMenu.java`: `fabric/base/src/main/java/com/justbrightness/fabric/` and `fabric/26.3/src/main/java/com/justbrightness/fabric/`
+- `JustBrightnessNeoForge.java`: `neoforge/base/src/main/java/com/justbrightness/neoforge/` and `neoforge/26.3/src/main/java/com/justbrightness/neoforge/`
+- `JustBrightnessNeoForgeClient.java`: `neoforge/base/src/main/java/com/justbrightness/neoforge/` and `neoforge/26.3/src/main/java/com/justbrightness/neoforge/`
+
+`JustBrightnessModMenu.java` and `JustBrightnessNeoForgeClient.java` are currently
+byte-identical between their two locations (no API-forced difference). Any change to a
+`*/base/` entry point's registration/wiring logic must be mirrored into the corresponding
+`*/26.3/` file.
+
 ### MC 26.x API differences
 
 | 1.21.1 | 26.3 |
