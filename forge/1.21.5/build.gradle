@@ -1,0 +1,2 @@
+plugins { id 'net.minecraftforge.gradle' }
+apply from: rootProject.file('gradle/version-builds/forge-1.21.gradle')

@@ -1,0 +1,35 @@
+neoForge {
+    neoFormVersion = neoform_version
+}
+
+// 1.21.9 introduced KeyMapping.Category and an extra LightTexture option read.
+def sharedCommon = minecraft_version in ['1.21.9', '1.21.10']
+        ? rootProject.file('common/1.21.9/src/main')
+        : rootProject.file('common/1.21.1/src/main')
+sourceSets.main {
+    java.srcDir new File(sharedCommon, 'java')
+    java.srcDir rootProject.file('common/shared/src/main/java')
+    if (minecraft_version != '1.21.9') {
+        resources.srcDir new File(sharedCommon, 'resources')
+    }
+}
+
+dependencies {
+    // NeoForm 1.21.x pins ASM 9.3. Mixin annotations do not need Mixin's bundled
+    // ASM implementation at compile time, so use NeoForm's compatible ASM instead.
+    compileOnly('net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7') {
+        exclude group: 'org.ow2.asm'
+    }
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
+    compileOnly "com.electronwill.night-config:toml:${night_config_version}"
+}
+
+configurations {
+    commonJava { canBeConsumed = true; canBeResolved = false }
+    commonResources { canBeConsumed = true; canBeResolved = false }
+}
+
+artifacts {
+    commonJava new File(sharedCommon, 'java')
+    commonResources new File(sharedCommon, 'resources')
+}

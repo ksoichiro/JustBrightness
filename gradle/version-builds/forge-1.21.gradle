@@ -1,0 +1,45 @@
+def sharedCommon = rootProject.file('common/1.21.1/src/main')
+def forgeJava = minecraft_version in ['1.21.3', '1.21.4', '1.21.5']
+        ? rootProject.file('forge/1.21.1/src/main/java')
+        : minecraft_version in ['1.21.6', '1.21.7', '1.21.8']
+                ? rootProject.file('forge/1.21.6/src/main/java')
+                : minecraft_version == '1.21.9'
+                        ? rootProject.file('forge/1.21.9/src/main/java')
+                        : rootProject.file('forge/base/src/main/java')
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+            if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) jvmArgs '-XstartOnFirstThread'
+            args "--mixin.config=${mod_id}.mixins.json"
+        }
+        register('client')
+    }
+}
+repositories { minecraft.mavenizer(it); maven fg.forgeMaven; maven fg.minecraftLibsMaven }
+configurations { commonJava { canBeResolved = true }; commonResources { canBeResolved = true } }
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
+    compileOnly project(':common')
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
+    compileOnly "com.electronwill.night-config:toml:${night_config_version}"
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+sourceSets.main {
+    java.srcDir forgeJava
+    java.srcDir rootProject.file('common/shared/src/main/java')
+    resources.srcDir rootProject.file('forge/1.21.1/src/main/resources')
+}
+tasks.named('compileJava') { dependsOn configurations.commonJava; source configurations.commonJava }
+tasks.named('processResources') {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+    filesMatching('META-INF/mods.toml') { expand(version: mod_version, minecraft_version: minecraft_version, forge_version: forge_version) }
+}
+tasks.named('jar') { manifest { attributes('MixinConfigs': 'justbrightness.mixins.json') } }
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}
