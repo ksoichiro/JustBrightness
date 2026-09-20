@@ -11,6 +11,12 @@ minecraft {
             if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
                 jvmArgs '-XstartOnFirstThread'
             }
+            // Dev runs load resources from a raw output directory, not a jar, so there is no
+            // MANIFEST.MF for Mixin's MixinConfigs discovery to read -- the mixin config must
+            // be passed explicitly as a program argument (mirrors what MixinGradle used to
+            // inject automatically; verified against Forge's own 1.21.11 MDKExamples
+            // mixins-only/fg7 reference project).
+            args "--mixin.config=${mod_id}.mixins.json"
         }
         register('client')
     }
@@ -63,6 +69,17 @@ tasks.named('processResources') {
             version: mod_version,
             minecraft_version: minecraft_version,
             forge_version: forge_version,
+        )
+    }
+}
+
+// Forge's Mixin platform agent (MixinPlatformAgentDefault) discovers mixin configs only via
+// the jar's MixinConfigs manifest attribute -- unlike NeoForge, it ignores mods.toml's
+// [[mixins]] table entirely, so without this the mixin silently never applies.
+tasks.named('jar') {
+    manifest {
+        attributes(
+            'MixinConfigs': 'justbrightness.mixins.json',
         )
     }
 }

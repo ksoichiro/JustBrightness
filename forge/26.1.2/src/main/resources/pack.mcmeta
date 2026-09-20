@@ -1,6 +1,7 @@
 {
   "pack": {
     "description": "Just Brightness",
-    "pack_format": 76
+    "min_format": 76,
+    "max_format": 76
   }
 }
