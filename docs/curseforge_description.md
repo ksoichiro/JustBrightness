@@ -1,6 +1,6 @@
 # Just Brightness - CurseForge Description
 
-**A lightweight client-side brightness toggle for Minecraft 26.3 on NeoForge.**
+**A lightweight client-side brightness toggle for Minecraft on Fabric, NeoForge, and Forge.**
 
 ## Make dark places easier to see
 
@@ -21,14 +21,14 @@ brightness setting.
 - Show or hide the temporary action-bar message after a toggle
 - Rebind the toggle key in the standard **Options → Controls** screen
 - Bind a separate **Open Settings** key to configure the mod in game
-- Client-side only, with no runtime dependencies beyond NeoForge
+- Client-side only, with no runtime dependencies beyond the selected mod loader
 
 Settings are stored in `config/justbrightness.toml`.
 
 ## Installation
 
-1. Install NeoForge for Minecraft 26.3.
-2. Download the NeoForge 26.3 JAR.
+1. Install Fabric, NeoForge, or Forge for your Minecraft version.
+2. Download the matching Just Brightness JAR for your mod loader and Minecraft version.
 3. Put the JAR in your Minecraft instance's `mods` folder.
 4. Launch the game.
 
@@ -46,8 +46,8 @@ lighting independently, so the visible result may vary with the shader pack.
 
 ## Requirements
 
-- Minecraft Java Edition 26.3
-- NeoForge 26.3
+- Minecraft Java Edition 1.21.1, 1.21.11, 26.1.2, 26.2, or 26.3
+- Fabric, NeoForge, or Forge for the selected Minecraft version
 
 ## Support and source
 

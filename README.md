@@ -11,6 +11,9 @@ your usual vanilla brightness setting.
 | Minecraft | Mod loaders |
 | --- | --- |
 | 1.21.1 | Fabric, NeoForge, Forge |
+| 1.21.11 | Fabric, NeoForge, Forge |
+| 26.1.2 | Fabric, NeoForge, Forge |
+| 26.2 | Fabric, NeoForge, Forge |
 | 26.3 | Fabric, NeoForge, Forge |
 
 It is client-side only. Install it on the client, not on a dedicated server.
@@ -60,6 +63,9 @@ Build a target by specifying its Minecraft version and loader:
 
 ```bash
 ./gradlew :forge:build -Ptarget_mc_version=1.21.1
+./gradlew :forge:build -Ptarget_mc_version=1.21.11
+./gradlew :forge:build -Ptarget_mc_version=26.1.2
+./gradlew :forge:build -Ptarget_mc_version=26.2
 ./gradlew :forge:build -Ptarget_mc_version=26.3
 ```
 
