@@ -125,3 +125,15 @@ touch gamma).
 `Gui#setOverlayMessage` also moved during the 26.x line: it lives directly on `Gui` at 26.1.2
 (same as 1.21.1) but moved onto a new `Gui#hud` (`Hud#setOverlayMessage`) field starting with
 26.2 — `BrightnessController` must call the right one per version.
+
+**Trap**: `common/{version}/justbrightness.mixins.json`'s `compatibilityLevel` cannot just track
+`java_version` from `props/{version}.properties`. 26.1.2/26.2/26.3 all set `java_version=25`, but
+Forge (unlike Fabric Loom / NeoForge's moddev, which apparently bundle a newer/patched Mixin
+build) pins the plain upstream `org.spongepowered:mixin:0.8.7`, whose `CompatibilityLevel` enum
+only goes up to `JAVA_21` — no `JAVA_25` entry exists at all. Declaring `"compatibilityLevel":
+"JAVA_25"` (copied from `java_version`, seemed like the obvious value) makes Forge fail at
+startup with `MixinInitialisationError: ... specifies compatibility level JAVA_25 which is not
+recognised`, while Fabric/NeoForge start up fine with the exact same file. `common/26.1.2` and
+`common/26.2` now declare `"JAVA_21"` instead (verified fine for Fabric/NeoForge too, and fixes
+the Forge crash) — `common/26.3` still has `forge/26.3` out of scope so it's untouched, but if
+Forge support is ever added there this same trap applies.
