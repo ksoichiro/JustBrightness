@@ -41,6 +41,7 @@ dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
 
     compileOnly project(':common')
+    compileOnly project(':forge-base')
     // Forge ships night-config at runtime, so this is compile-classpath only.
     compileOnly "com.electronwill.night-config:core:${night_config_version}"
     compileOnly "com.electronwill.night-config:toml:${night_config_version}"
@@ -51,6 +52,7 @@ dependencies {
 
 sourceSets.main {
     java {
+        srcDir rootProject.file('forge/base/src/main/java')
         srcDir rootProject.file('common/shared/src/main/java')
     }
 }

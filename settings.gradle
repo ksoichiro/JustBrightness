@@ -54,7 +54,9 @@ project(':common').projectDir = file("common/${targetMcVersion}")
 enabledPlatforms.each { platform ->
     def platformDir = file("${platform}/${targetMcVersion}")
     def baseDir = file("${platform}/base")
-    def hasOwnSources = new File(platformDir, "src/main/java").exists()
+    def hasOwnSources = !fileTree(new File(platformDir, "src/main/java")) {
+        include '**/*.java'
+    }.isEmpty()
     if (baseDir.exists() && !hasOwnSources) {
         include "${platform}-base"
         project(":${platform}-base").projectDir = baseDir
