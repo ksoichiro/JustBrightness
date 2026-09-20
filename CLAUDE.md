@@ -33,6 +33,7 @@ Build a specific platform for a target Minecraft version:
   own copy despite also being a "1.x" MC version — see the note below the API table
 - `fabric/{version}/`, `neoforge/{version}/` — Mod metadata; own Java entry point when base is incompatible
 - `forge/{version}/` — Forge loader module. **No `forge/base` exists or is planned** — every `forge/{version}` always carries its own full entry-point sources (mirrors JustCoordinates, a sibling project using the same architecture)
+- `forge/{version}/src/main/resources/pack.mcmeta` — **Forge-only requirement.** Forge treats a mod's resources as a vanilla resource pack and requires `pack.mcmeta` with a `pack_format` matching that Minecraft version; without it Forge logs "failed to load a valid ResourcePackInfo" for the mod's resources and silently drops them, including lang files (so translation keys render raw, e.g. `key.category.justbrightness.justbrightness` in the settings screen). Fabric and NeoForge don't need this file — don't assume it's optional everywhere because it's absent from `fabric/`/`neoforge/`. Get the correct `pack_format` per version from JustCoordinates' `forge/{version}/src/main/resources/pack.mcmeta` (verified values: 1.21.11→75, 26.1.2→76, 26.2→88).
 - `props/{version}.properties` — Version-specific dependency versions, including `enabled_platforms` (`fabric,neoforge` or `fabric,neoforge,forge`)
 
 `settings.gradle` includes `{platform}-base` only when `{platform}/{version}/src/main/java`
@@ -63,10 +64,22 @@ must be kept in sync across every Forge-enabled version the same way (currently 
 
 ### MC 1.21.11 API differences
 
-Common code (`InputConstants.Type.KEYSYM`, `LightTexture#updateLightTexture`,
-`Screen#render`/`Minecraft#setScreen`, Fabric `KeyBindingHelper`) is unchanged from 1.21.1 — only
-the keybind category mechanism moved to `KeyMapping.Category` (same shape as the 26.x versions;
-see the table below and `common/1.21.11/BrightnessController.java`).
+Common code (`InputConstants.Type.KEYSYM`, `Screen#render`/`Minecraft#setScreen`, Fabric
+`KeyBindingHelper`) is unchanged from 1.21.1 — the keybind category mechanism moved to
+`KeyMapping.Category` (same shape as the 26.x versions; see the table below and
+`common/1.21.11/BrightnessController.java`).
+
+**Trap**: `LightTexture#updateLightTexture` gained a new `options.hideLightningFlash().get()`
+call (inside the `endFlashState != null` branch) between 1.21.1 and 1.21.11, which shifts the
+`OptionInstance.get()` ordinal that `GammaOverrideMixin` redirects: it's ordinal 1
+(`darknessEffectScale` is 0) at 1.21.1, but ordinal **2** at 1.21.11
+(0=`hideLightningFlash`, 1=`darknessEffectScale`, 2=`gamma`). This was initially missed because
+the ordinal was "verified" by grepping decompiled source only for the option names already
+expected (`darknessEffectScale`/`gamma`) instead of reading the whole method — the redirect
+silently compiled and ran against the wrong option (`darknessEffectScale` instead of `gamma`),
+so gamma never visibly changed in-game despite a clean build. When verifying a `@Redirect`
+ordinal for a new version, read the **entire target method** (or disassemble it with `javap -c`)
+rather than grepping for the specific calls you expect to find.
 
 **Trap**: `net.neoforged.fml.loading.FMLEnvironment.dist` is gone in NeoForge `21.11.38-beta`
 (the version 1.21.11 pins) — `FMLEnvironment.getDist()` is required, exactly like 26.x. This is
