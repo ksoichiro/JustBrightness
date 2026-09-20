@@ -1,0 +1,80 @@
+plugins {
+    id 'net.minecraftforge.gradle'
+}
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+            if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+                jvmArgs '-XstartOnFirstThread'
+            }
+            args "--mixin.config=${mod_id}.mixins.json"
+        }
+        register('client')
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
+configurations {
+    commonJava {
+        canBeResolved = true
+    }
+    commonResources {
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
+
+    compileOnly project(':common')
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
+    compileOnly "com.electronwill.night-config:toml:${night_config_version}"
+
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+sourceSets.main {
+    java {
+        srcDir rootProject.file('common/shared/src/main/java')
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+
+tasks.named('processResources') {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+
+    filesMatching('META-INF/mods.toml') {
+        expand(
+            version: mod_version,
+            minecraft_version: minecraft_version,
+            forge_version: forge_version,
+        )
+    }
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes(
+            'MixinConfigs': 'justbrightness.mixins.json',
+        )
+    }
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}

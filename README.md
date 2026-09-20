@@ -6,9 +6,12 @@ Press a key to apply your preferred gamma value while playing. It does not chang
 the brightness setting saved by Minecraft, so turning it off returns rendering to
 your usual vanilla brightness setting.
 
-## Initial Release
+## Supported Versions
 
-The initial public release supports **Minecraft 26.3 with NeoForge**.
+| Minecraft | Mod loaders |
+| --- | --- |
+| 1.21.1 | Fabric, NeoForge, Forge |
+| 26.3 | Fabric, NeoForge, Forge |
 
 It is client-side only. Install it on the client, not on a dedicated server.
 Please follow the rules of every multiplayer server you join.
@@ -21,12 +24,12 @@ Please follow the rules of every multiplayer server you join.
 - Show or hide the temporary action-bar message displayed after a toggle
 - Open the in-game settings screen from a separate, unbound keybind
 - Rebind both keys in Minecraft's standard Controls screen
-- No runtime dependencies beyond NeoForge
+- No runtime dependencies beyond the selected mod loader
 
 ## Installation
 
-1. Install [NeoForge](https://neoforged.net/) for Minecraft 26.3.
-2. Download the NeoForge 26.3 release from CurseForge or Modrinth.
+1. Install the matching version of [Fabric](https://fabricmc.net/), [NeoForge](https://neoforged.net/), or [Forge](https://files.minecraftforge.net/) for your Minecraft version.
+2. Download the matching Just Brightness release from CurseForge or Modrinth.
 3. Place the JAR file in the instance's `mods` folder.
 4. Start Minecraft.
 
@@ -53,13 +56,14 @@ Initialize it after cloning:
 git clone --recurse-submodules https://github.com/ksoichiro/JustBrightness.git
 ```
 
-Build the initial release target:
+Build a target by specifying its Minecraft version and loader:
 
 ```bash
-./gradlew :neoforge:build -Ptarget_mc_version=26.3
+./gradlew :forge:build -Ptarget_mc_version=1.21.1
+./gradlew :forge:build -Ptarget_mc_version=26.3
 ```
 
-The JAR is written to `neoforge/26.3/build/libs/`.
+The JAR is written to `<loader>/<minecraft-version>/build/libs/`.
 
 ## License
 
