@@ -96,6 +96,21 @@ gated by the **NeoForge library version**, not by the MC 1.x/26.x numbering spli
 it isn't 26.x. Fabric's entry points had no equivalent break, so `fabric/1.21.11` still reuses
 `fabric/base` normally.
 
+### Pre-1.20 API differences (1.19.2 and earlier)
+
+`GuiGraphics` doesn't exist before 1.20 — `ConfigScreen#render` and friends must use the
+`PoseStack`-based `Screen`/`AbstractSliderButton`/`CycleButton` APIs instead (no verbatim copy
+from `common/1.20.1/ConfigScreen.java` is possible), and `Button` has no `.builder(...)` static
+factory yet, only the direct `Button(int, int, int, int, Component, OnPress)` constructor.
+NeoForge also doesn't exist before 1.20.1, so every pre-1.20 version is Fabric+Forge only, same
+as `common/1.20.1`/`forge/1.20.1`.
+
+The `GammaOverrideMixin` `@Redirect` on `LightTexture#updateLightTexture`'s `OptionInstance.get()`
+calls keeps the same ordinal at 1.19.2 as at 1.20.1 (0=`darknessEffectScale`, 1=`gamma` — there is
+no `hideLightningFlash` call at all this far back; that third option only appears starting at
+1.21.11, see above) — confirmed by decompiling 1.19.2's vanilla sources jar, not assumed from the
+1.20.1 copy.
+
 ### MC 26.x API differences
 
 All of 1.21.1 → 26.1.2/26.2/26.3 share the `net.fabricmc.fabric-loom`/`modImplementation`-less
