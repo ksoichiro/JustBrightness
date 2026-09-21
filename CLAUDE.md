@@ -111,6 +111,71 @@ no `hideLightningFlash` call at all this far back; that third option only appear
 1.21.11, see above) — confirmed by decompiling 1.19.2's vanilla sources jar, not assumed from the
 1.20.1 copy.
 
+**Trap**: `OptionInstance` does not exist at all before 1.19 — at 1.18.2, `LightTexture#
+updateLightTexture` reads gamma as a bare public field, `this.minecraft.options.gamma` (`Options#
+gamma` is `public double gamma;`, no getter). `GammaOverrideMixin` for 1.18.2 must therefore
+`@Redirect` a `@At(value = "FIELD", target = "Lnet/minecraft/client/Options;gamma:D")` returning
+a primitive `double`, not a method-call redirect on `OptionInstance.get()` — an API-shape change,
+not just a signature tweak. No `ordinal` is needed there (only one `options.gamma` read exists in
+the method body, unlike the multiple `OptionInstance.get()` calls at 1.19.2+).
+
+`Component.translatable(...)` and `CommonComponents.EMPTY` don't exist at 1.18.2 either (both are
+1.19+ additions) — use `new TranslatableComponent(key, args...)` (`net.minecraft.network.chat.
+TranslatableComponent`) and `TextComponent.EMPTY` instead. `CommonComponents.GUI_DONE` itself is
+fine unchanged. This was caught by a compile error, not a silent trap, but worth listing here so
+the next backport doesn't rediscover it via a failed build.
+
+Forge's mod-registration APIs used at 1.19.2/1.20.1 also don't exist yet at 1.18.2 (confirmed via
+decompiled Forge 1.18.2-40.2.21 sources, cached from a JustCoordinates build):
+`RegisterKeyMappingsEvent` → use `net.minecraftforge.client.ClientRegistry.registerKeyBinding(...)`
+called during `FMLClientSetupEvent` (mod bus) instead; `ConfigScreenHandler.ConfigScreenFactory`
+→ use `net.minecraftforge.client.ConfigGuiHandler.ConfigGuiFactory` instead (same
+`ModLoadingContext.get().registerExtensionPoint(...)` call shape, different class); and
+`ClientPlayerNetworkEvent.LoggingIn` doesn't exist as a nested-class name at 1.18.2 — the
+equivalent for the world-join hook is `ClientPlayerNetworkEvent.LoggedInEvent`.
+
+**Trap (build wiring, affects 1.18.2/1.19.2/1.20.1 Forge alike, found via real-launcher testing)**:
+`net.neoforged.moddev.legacyforge`'s Forge (SRG/MCP-based, needs `reobfJar`) does **not**
+automatically wire the Mixin annotation processor the way Fabric Loom or ForgeGradle 7.x
+(1.21.1+/26.x) do. Without it, no Mixin refmap is ever generated, `justbrightness.mixins.json`
+has no `"refmap"` key, and `:forge:runClient` (dev, unobfuscated names) loads mixins fine — but a
+real, reobfuscated Forge install fails with `InvalidInjectionException: ... could not find any
+targets matching 'updateLightTexture' ... No refMap loaded`, because the mixin's target-method
+string is never translated to the SRG name the reobfuscated jar actually uses. **A clean
+`:forge:build`, and even a successful `:forge:runClient`, prove nothing about this** — it only
+surfaces in a real launcher (found via a real Prism Launcher run, not automated testing).
+Fix (applied to `forge/{1.18.2,1.19.2,1.20.1}/build.gradle`): add
+`annotationProcessor 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'` to `dependencies`, and a
+`mixin { config 'justbrightness.mixins.json'; add sourceSets.main, 'justbrightness-refmap.json' }`
+block (the `mixin` extension comes from the `net.neoforged.moddev.legacyforge` plugin itself,
+confirmed by decompiling `moddev-gradle-*.jar`'s `MixinExtension`/`MixinCompilerArgs` classes —
+there is no public documentation page for this; it had to be found by reading the plugin's own
+bytecode). Also add `"refmap": "justbrightness-refmap.json"` to the shared
+`common/{version}/src/main/resources/justbrightness.mixins.json` (this file is bundled by both
+Fabric and Forge builds via `commonResources`). **This is safe for Fabric too**: verified by
+decompiling the actually-remapped Fabric jar's `GammaOverrideMixin.class` — Fabric Loom's
+`remapJar` rewrites the `@Redirect`/`@At` annotation string constants directly in the class
+bytecode (e.g. `updateLightTexture` → `method_3313`, confirmed via `javap -v`), so Fabric never
+needed a refmap file at all; declaring one that doesn't exist in the Fabric jar only produces a
+benign, self-explanatory log warning (`Reference map ... could not be read. If this is a
+development environment you can ignore this message`), not a failure — confirmed by an actual
+`:fabric:runClient` run after adding the key, not assumed. 1.21.1+/26.x (ForgeGradle 7.x,
+official-Mojang-mappings runtime, no reobfuscation) are believed unaffected since they never
+reobfuscate to a different name set in the first place, but this was inferred by comparing
+`forge/1.21.1/build.gradle`'s plugin choice against the legacyforge one, not verified via an
+actual real-launcher test the way the 1.18.2 failure was — don't assume it's clean without
+checking if a similar report ever comes in for those versions.
+
+**Trap (environment, not code)**: on Apple Silicon, `:forge:runClient` for 1.18.2 crashes before
+any world loads with `UnsatisfiedLinkError: ... liblwjgl.dylib ... incompatible architecture
+(have 'x86_64', need 'arm64...')` — the legacyforge/moddev-resolved LWJGL 3.2.1-SNAPSHOT natives
+for this version have no arm64 macOS build. This is unrelated to mod code (confirmed: `:fabric:
+runClient` for the same MC version, same machine, loads fine — Fabric Loom apparently patches/
+resolves different natives). `forge:runClient` smoke-testing pre-1.19 versions on Apple Silicon
+therefore can't verify Forge-side Mixin application the way it does for 1.19.2+; rely on the
+Fabric-side smoke test (same shared Mixin class from `:common`) plus an actual in-game check on
+a compatible machine instead.
+
 ### MC 26.x API differences
 
 All of 1.21.1 → 26.1.2/26.2/26.3 share the `net.fabricmc.fabric-loom`/`modImplementation`-less

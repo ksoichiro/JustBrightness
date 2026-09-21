@@ -1,0 +1,12 @@
+{
+  "key.categories.justbrightness": "Just Brightness",
+  "key.justbrightness.toggle": "明るさを切り替え",
+  "key.justbrightness.open_config": "設定を開く",
+  "justbrightness.message.enabled": "明るさを有効化しました（ガンマ: %s）",
+  "justbrightness.message.disabled": "明るさを無効化しました",
+  "justbrightness.config.title": "Just Brightness の設定",
+  "justbrightness.config.gamma": "ガンマ: %s",
+  "justbrightness.config.default_enabled": "ワールド参加時に有効",
+  "justbrightness.config.show_toggle_message": "切り替えメッセージを表示",
+  "justbrightness.config.reset": "初期値に戻す"
+}

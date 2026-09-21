@@ -21,6 +21,15 @@ legacyForge {
     }
 }
 
+// Generates the Mixin refmap needed to resolve mixin targets against the
+// reobfuscated (SRG) names used by a real, non-dev Forge installation.
+// Without this, mixins load fine under :runClient (unobfuscated dev names)
+// but fail with "No refMap loaded" in any real launcher.
+mixin {
+    config 'justbrightness.mixins.json'
+    add sourceSets.main, 'justbrightness-refmap.json'
+}
+
 configurations {
     commonJava {
         canBeResolved = true
@@ -32,6 +41,7 @@ configurations {
 
 dependencies {
     compileOnly project(':common')
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'
 
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
