@@ -46,7 +46,7 @@ lighting independently, so the visible result may vary with the shader pack.
 
 ## Requirements
 
-- Minecraft Java Edition 1.21.1, 1.21.11, 26.1.2, 26.2, or 26.3
+- Minecraft Java Edition 1.21.1, 1.21.3 through 1.21.11, 26.1.2, 26.2, or 26.3
 - Fabric, NeoForge, or Forge for the selected Minecraft version
 
 ## Support and source

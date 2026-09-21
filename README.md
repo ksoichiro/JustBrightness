@@ -11,6 +11,14 @@ your usual vanilla brightness setting.
 | Minecraft | Mod loaders |
 | --- | --- |
 | 1.21.1 | Fabric, NeoForge, Forge |
+| 1.21.3 | Fabric, NeoForge, Forge |
+| 1.21.4 | Fabric, NeoForge, Forge |
+| 1.21.5 | Fabric, NeoForge, Forge |
+| 1.21.6 | Fabric, NeoForge, Forge |
+| 1.21.7 | Fabric, NeoForge, Forge |
+| 1.21.8 | Fabric, NeoForge, Forge |
+| 1.21.9 | Fabric, NeoForge, Forge |
+| 1.21.10 | Fabric, NeoForge, Forge |
 | 1.21.11 | Fabric, NeoForge, Forge |
 | 26.1.2 | Fabric, NeoForge, Forge |
 | 26.2 | Fabric, NeoForge, Forge |
@@ -63,6 +71,14 @@ Build a target by specifying its Minecraft version and loader:
 
 ```bash
 ./gradlew :forge:build -Ptarget_mc_version=1.21.1
+./gradlew :forge:build -Ptarget_mc_version=1.21.3
+./gradlew :forge:build -Ptarget_mc_version=1.21.4
+./gradlew :forge:build -Ptarget_mc_version=1.21.5
+./gradlew :forge:build -Ptarget_mc_version=1.21.6
+./gradlew :forge:build -Ptarget_mc_version=1.21.7
+./gradlew :forge:build -Ptarget_mc_version=1.21.8
+./gradlew :forge:build -Ptarget_mc_version=1.21.9
+./gradlew :forge:build -Ptarget_mc_version=1.21.10
 ./gradlew :forge:build -Ptarget_mc_version=1.21.11
 ./gradlew :forge:build -Ptarget_mc_version=26.1.2
 ./gradlew :forge:build -Ptarget_mc_version=26.2
