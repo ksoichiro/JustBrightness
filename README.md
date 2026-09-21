@@ -10,6 +10,7 @@ your usual vanilla brightness setting.
 
 | Minecraft | Mod loaders |
 | --- | --- |
+| 1.20.1 | Fabric, Forge |
 | 1.21.1 | Fabric, NeoForge, Forge |
 | 1.21.3 | Fabric, NeoForge, Forge |
 | 1.21.4 | Fabric, NeoForge, Forge |
@@ -70,6 +71,7 @@ git clone --recurse-submodules https://github.com/ksoichiro/JustBrightness.git
 Build a target by specifying its Minecraft version and loader:
 
 ```bash
+./gradlew :forge:build -Ptarget_mc_version=1.20.1
 ./gradlew :forge:build -Ptarget_mc_version=1.21.1
 ./gradlew :forge:build -Ptarget_mc_version=1.21.3
 ./gradlew :forge:build -Ptarget_mc_version=1.21.4

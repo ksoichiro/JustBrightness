@@ -57,10 +57,9 @@ enabledPlatforms.each { platform ->
     def hasOwnSources = !fileTree(new File(platformDir, "src/main/java")) {
         include '**/*.java'
     }.isEmpty()
-    // A version may intentionally source Java from a shared compatibility baseline
-    // through its own build script. In that case it must not also configure the
-    // newer platform base module, whose APIs can differ for older MC releases.
-    if (baseDir.exists() && !hasOwnSources && !file("${platform}/${targetMcVersion}/build.gradle").exists()) {
+    // Version-specific modules with Java sources provide their own compatibility
+    // implementation. Modules without Java sources use the platform baseline.
+    if (baseDir.exists() && !hasOwnSources) {
         include "${platform}-base"
         project(":${platform}-base").projectDir = baseDir
     }
