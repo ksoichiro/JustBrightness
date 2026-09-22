@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Fabric and Forge support for Minecraft 1.16.5
 - Fabric and Forge support for Minecraft 1.17.1
 - Fabric and Forge support for Minecraft 1.18.2
 - Fabric and Forge support for Minecraft 1.19.2

@@ -1,0 +1,55 @@
+plugins {
+    id 'dev.architectury.loom'
+}
+
+loom {
+    forge {
+        mixinConfig "justbrightness.mixins.json"
+    }
+}
+
+configurations {
+    commonJava {
+        canBeResolved = true
+    }
+    commonResources {
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    forge "net.minecraftforge:forge:${forge_version}"
+
+    compileOnly project(':common')
+    modImplementation include("com.electronwill.night-config:core:${night_config_version}")
+    modImplementation include("com.electronwill.night-config:toml:${night_config_version}")
+
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+sourceSets.main {
+    java {
+        srcDir rootProject.file('common/shared/src/main/java')
+    }
+    resources {
+        srcDir rootProject.file("common/${target_mc_version}/src/main/resources")
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+
+tasks.named('processResources') {
+    filesMatching('META-INF/mods.toml') {
+        expand(
+                version: mod_version,
+                minecraft_version: minecraft_version,
+                forge_version: forge_version,
+        )
+    }
+}

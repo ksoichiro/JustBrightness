@@ -11,8 +11,11 @@ subprojects {
     }
 
     java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(java_version as int)
+        // JDK 8 does not support --release flag; use project JDK with options.release instead
+        if ((java_version as int) >= 9) {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(java_version as int)
+            }
         }
     }
 

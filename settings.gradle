@@ -10,7 +10,9 @@ pluginManagement {
 
     def targetVer = settings.providers.gradleProperty('target_mc_version').getOrNull()
     plugins {
-        if (targetVer.startsWith('1.')) {
+        if (targetVer == '1.16.5') {
+            id 'dev.architectury.loom' version settings.providers.gradleProperty('architectury_loom_version').get()
+        } else if (targetVer.startsWith('1.')) {
             id 'fabric-loom' version settings.providers.gradleProperty('fabric_loom_version').get()
             id 'net.minecraftforge.gradle' version settings.providers.gradleProperty('forgegradle_version').get()
         } else {

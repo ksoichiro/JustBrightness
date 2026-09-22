@@ -208,6 +208,78 @@ Could not initialize class com.mojang.blaze3d.systems.RenderSystem` during `Mine
 expected, not a new regression; verify via the built jar's bundled refmap + a real launcher
 instead, same as 1.18.2.
 
+### MC 1.16.5: Architectury Loom instead of legacyforge, and a third Forge API generation
+
+1.16.5 cannot use `fabric-loom` + `net.neoforged.moddev.legacyforge` (the toolchain for
+1.17.1-1.20.1) — it needs **`dev.architectury.loom`** for both platforms instead, wired via a
+`targetVer == '1.16.5'` branch in `settings.gradle`'s `pluginManagement.plugins` block (checked
+*before* the general `startsWith('1.')` branch). `gradle.properties`' `architectury_loom_version`
+was declared but unused until this version. Root `build.gradle`'s `toolchain { ... }` block must
+be skipped for `java_version < 9` (`if ((java_version as int) >= 9) { toolchain { ... } }`) since
+JDK 8 doesn't support the `--release`-flag toolchain path — `options.release = java_version as
+int` (unconditional) still handles compilation targeting. Verified against JustCoordinates' own
+working `settings.gradle`/`build.gradle`, which already special-cases exactly this.
+
+**Mixin needs no refmap/AP wiring under Architectury Loom** (unlike `net.neoforged.moddev.
+legacyforge`, which needed the `annotationProcessor`/`mixin { add sourceSets.main, ... }` fix
+documented above) — just `loom { forge { mixinConfig "justbrightness.mixins.json" } }` in
+`forge/1.16.5/build.gradle` (plus the standard `[[mixins]] config="..."` entry in `mods.toml`,
+which Forge itself reads in production regardless of toolchain). Confirmed by diffing ChronoDawn's
+source vs. built `forge/1.20.1` mixins.json (Architectury Loom + Mixin, no `"refmap"` key
+anywhere) — Architectury Loom rewrites Mixin annotation strings directly in the compiled
+bytecode at remap time, same mechanism as Fabric Loom.
+
+**Yet another `ClientRegistry` package** (third distinct one across just three Forge versions
+so far): `net.minecraftforge.fml.client.registry.ClientRegistry` at 1.16.5 (vs.
+`net.minecraftforge.fmlclient.registry.ClientRegistry` at 1.17.1, `net.minecraftforge.client.
+ClientRegistry` at 1.18.2+). **No `ConfigGuiHandler`/`ConfigScreenHandler` class exists yet** —
+config-screen registration at 1.16.5 uses `net.minecraftforge.fml.ExtensionPoint.CONFIGGUIFACTORY`
+(a typed `ExtensionPoint<BiFunction<Minecraft, Screen, Screen>>` constant, no wrapper record
+class): `ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
+() -> (minecraft, parent) -> new ConfigScreen(parent))`. `ClientPlayerNetworkEvent.LoggedInEvent`
+and `TickEvent.ClientTickEvent` are unchanged from 1.17.1/1.18.2. All confirmed via decompiled
+1.16.5 Forge sources plus JustCoordinates' own real, working 1.16.5 Forge entry-point code.
+
+**No `CycleButton` and no `Screen#addRenderableWidget` at 1.16.5** — both are later additions.
+`Screen`'s widget-registration method is named `addButton` (not `addRenderableWidget`) at this
+version, confirmed via JustCoordinates' own working `ConfigScreen.java` and Architectury Loom's
+tiny mapping file (`method_25411` → `addButton`, no `CycleButton` entry anywhere in the mapping
+table at all). `AbstractSliderButton` **does** exist, same package as 1.18.2+
+(`net.minecraft.client.gui.components.AbstractSliderButton`, confirmed via mapping
+`net/minecraft/class_357` → that exact class) — only the on/off toggle buttons need a manual
+rewrite: a plain `Button` whose `onPress` flips a locally-tracked boolean, updates the config, and
+calls `button.setMessage(...)` with a relabeled `Component` (`CommonComponents.OPTION_ON`/
+`OPTION_OFF` appended to the option's translation key) instead of `CycleButton.onOffBuilder(...)`.
+
+**Fabric API's own mod id is `"fabric"` at `fabric_api_version=0.42.0+1.16`** — same trap as
+1.17.1's `0.46.1+1.17`; `fabric/1.16.5/src/main/resources/fabric.mod.json` must depend on
+`"fabric": "*"`, not `"fabric-api": "*"`.
+
+**`common/shared` is compiled per-version at that version's `java_version`, so any newer Java
+syntax there breaks the oldest target.** Adding 1.16.5 (`java_version=8`) surfaced this
+immediately: `BrightnessConfig.java` used Java 16's pattern-matching `instanceof` (`if (x
+instanceof Number number)`), which fails with "パターンの一致は-source 8でサポートされていません" —
+fixed by reverting to classic `instanceof` + cast (works on every Java version this project
+targets). This is a real trap for `common/shared` specifically (not per-version `common/{ver}`
+code, which only needs to compile for its own single version) — any future syntax added there
+must stay compatible with the *lowest* `java_version` across all supported versions, not just
+whatever version was being edited at the time.
+
+**`:forge:runClient` for 1.16.5 crashes in pure vanilla/Forge code, unrelated to this mod** — LWJGL
+itself initializes fine this time (unlike 1.17.1/1.18.2's arch-mismatch crash), but model baking
+then throws `NoSuchMethodError: com.mojang.math.Transformation.func_227987_b_()` from
+`net.minecraft.core.BlockMath.<clinit>` — no `com.justbrightness`/`com.justbrightness.forge`
+frame anywhere in the stack trace. This looks like an Architectury Loom 1.16.5 Forge dev-run
+SRG-mapping mismatch inside Forge's own patched vanilla jar, not a defect in this mod's code —
+verify via a real launcher instead of chasing this further in dev.
+
+**1.16.5-era Forge doesn't bundle night-config** — unlike every other Forge version this project
+supports (1.17.1+), which ship it and only need `compileOnly` on the Forge module.
+`forge/1.16.5/build.gradle` needs `modImplementation include("com.electronwill.night-config:
+core:...")` / `...toml:...` (the same Fabric-style embedding used on every `fabric/*/build.gradle`)
+instead — confirmed via JustCoordinates' root `build.gradle`, which applies this exact embedding
+to its Architectury-Loom Forge module too.
+
 ### MC 26.x API differences
 
 All of 1.21.1 → 26.1.2/26.2/26.3 share the `net.fabricmc.fabric-loom`/`modImplementation`-less

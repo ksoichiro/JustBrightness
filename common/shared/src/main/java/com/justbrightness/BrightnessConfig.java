@@ -66,20 +66,20 @@ public final class BrightnessConfig {
         try (InputStream in = Files.newInputStream(configFile)) {
             CommentedConfig parsed = new TomlParser().parse(in);
             Object gammaValue = parsed.get("gamma");
-            if (gammaValue instanceof Number number) {
-                setGamma(number.doubleValue());
+            if (gammaValue instanceof Number) {
+                setGamma(((Number) gammaValue).doubleValue());
             } else if (gammaValue != null) {
                 LOGGER.warn("Invalid gamma = {} in {}; using default", gammaValue, FILE_NAME);
             }
             Object defaultEnabledValue = parsed.get("default_enabled");
-            if (defaultEnabledValue instanceof Boolean bool) {
-                defaultEnabled = bool;
+            if (defaultEnabledValue instanceof Boolean) {
+                defaultEnabled = (Boolean) defaultEnabledValue;
             } else if (defaultEnabledValue != null) {
                 LOGGER.warn("Invalid default_enabled = {} in {}; using default", defaultEnabledValue, FILE_NAME);
             }
             Object showToggleMessageValue = parsed.get("show_toggle_message");
-            if (showToggleMessageValue instanceof Boolean bool) {
-                showToggleMessage = bool;
+            if (showToggleMessageValue instanceof Boolean) {
+                showToggleMessage = (Boolean) showToggleMessageValue;
             } else if (showToggleMessageValue != null) {
                 LOGGER.warn("Invalid show_toggle_message = {} in {}; using default", showToggleMessageValue, FILE_NAME);
             }

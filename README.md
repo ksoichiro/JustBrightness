@@ -10,6 +10,7 @@ your usual vanilla brightness setting.
 
 | Minecraft | Mod loaders |
 | --- | --- |
+| 1.16.5 | Fabric, Forge |
 | 1.17.1 | Fabric, Forge |
 | 1.18.2 | Fabric, Forge |
 | 1.19.2 | Fabric, Forge |

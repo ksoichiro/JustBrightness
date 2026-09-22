@@ -1,0 +1,12 @@
+{
+  "key.categories.justbrightness": "Just Brightness",
+  "key.justbrightness.toggle": "Toggle Brightness",
+  "key.justbrightness.open_config": "Open Settings",
+  "justbrightness.message.enabled": "Brightness enabled (gamma: %s)",
+  "justbrightness.message.disabled": "Brightness disabled",
+  "justbrightness.config.title": "Just Brightness Settings",
+  "justbrightness.config.gamma": "Gamma: %s",
+  "justbrightness.config.default_enabled": "Enabled by default",
+  "justbrightness.config.show_toggle_message": "Show toggle message",
+  "justbrightness.config.reset": "Reset to Defaults"
+}
