@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fabric and Forge support for Minecraft 1.19.2
 - Fabric and Forge support for Minecraft 1.20.1
 - Forge support for Minecraft 1.21.1 and 26.3
-- Fabric, NeoForge, and Forge support for Minecraft 1.21.3 through 1.21.10
+- Fabric, NeoForge, and Forge support for Minecraft 1.21.3 through 1.21.11
 
 ## [0.1.0] - 2026-09-19
 
