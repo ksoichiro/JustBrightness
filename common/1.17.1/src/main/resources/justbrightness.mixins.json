@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.justbrightness.mixin",
+  "refmap": "justbrightness-refmap.json",
+  "compatibilityLevel": "JAVA_16",
+  "client": [
+    "GammaOverrideMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,5 @@
+# Just Brightness configuration
+schema_version = 1
+gamma = 16.0
+default_enabled = true
+show_toggle_message = true

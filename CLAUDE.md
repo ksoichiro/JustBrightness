@@ -119,6 +119,35 @@ a primitive `double`, not a method-call redirect on `OptionInstance.get()` — a
 not just a signature tweak. No `ordinal` is needed there (only one `options.gamma` read exists in
 the method body, unlike the multiple `OptionInstance.get()` calls at 1.19.2+).
 
+**Trap**: Fabric API's own mod id at `fabric_api_version=0.46.1+1.17` is `"fabric"`, not
+`"fabric-api"` — the `"fabric-api"` id (with `"provides": ["fabric"]` for back-compat) only starts
+at the version used by 1.18.2 (`0.75.1+1.18.2`) onward. `fabric/1.17.1/src/main/resources/
+fabric.mod.json`'s `depends` must declare `"fabric": "*"`, not `"fabric-api": "*"` — otherwise
+`:fabric:runClient` fails immediately with "Incompatible mods found! ... requires fabric-api but
+it's missing" even though the artifact resolved fine at compile time (confirmed via decompiling
+the actual `fabric-api-0.46.1+1.17.jar`'s `fabric.mod.json`). This is why `fabric/1.17.1` needs
+its own `fabric.mod.json` rather than being a byte-identical copy of 1.18.2's.
+
+**Trap**: `ConfigGuiHandler.ConfigGuiFactory` at 1.17.1 only has the two-arg
+`BiFunction<Minecraft, Screen, Screen>` record constructor — the single-arg
+`Function<Screen, Screen>` convenience constructor used at 1.18.2 doesn't exist yet (added later).
+Use `new ConfigGuiHandler.ConfigGuiFactory((minecraft, parent) -> new ConfigScreen(parent))` at
+1.17.1, confirmed via decompiled Forge 1.17.1-37.1.1 sources; caught as a compile error (unrelated
+lambda type-mismatch messages from javac), not a silent trap.
+
+**Trap**: `net.minecraftforge.client.ClientRegistry`/`ConfigGuiHandler` (used at 1.18.2) live under
+`net.minecraftforge.fmlclient`/`net.minecraftforge.fmlclient.registry` instead at 1.17.1 — same
+method/class shapes, different package, confirmed via decompiled Forge 1.17.1-37.1.1 sources. MC
+1.17 also raises the minimum Java version to 16 (`java_version=16`, `compatibilityLevel:
+"JAVA_16"` — safe, Mixin's `CompatibilityLevel` has had this constant since 0.8.2). On macOS
+arm64, `:fabric:runClient` for 1.17.1 needs the dev-run JVM raised to 17 even though the mod
+compiles for 16, because Fabric Loom injects `fabric-loom-native-support` (arm64 LWJGL natives
+for pre-1.19 versions) into dev runs and that support mod itself requires Java 17+ — otherwise
+the dev client aborts with "Incompatible mods found!". Fix: `tasks.withType(net.fabricmc.loom.
+task.AbstractRunTask).configureEach { javaLauncher = javaToolchains.launcherFor { languageVersion
+= JavaLanguageVersion.of(17) } }` in `fabric/1.17.1/build.gradle` (only affects the dev-run JVM,
+not compilation). 1.18.2 doesn't need this because it already targets Java 17.
+
 `Component.translatable(...)` and `CommonComponents.EMPTY` don't exist at 1.18.2 either (both are
 1.19+ additions) — use `new TranslatableComponent(key, args...)` (`net.minecraft.network.chat.
 TranslatableComponent`) and `TextComponent.EMPTY` instead. `CommonComponents.GUI_DONE` itself is
@@ -174,7 +203,10 @@ runClient` for the same MC version, same machine, loads fine — Fabric Loom app
 resolves different natives). `forge:runClient` smoke-testing pre-1.19 versions on Apple Silicon
 therefore can't verify Forge-side Mixin application the way it does for 1.19.2+; rely on the
 Fabric-side smoke test (same shared Mixin class from `:common`) plus an actual in-game check on
-a compatible machine instead.
+a compatible machine instead. Same category of failure recurs at 1.17.1 (`NoClassDefFoundError:
+Could not initialize class com.mojang.blaze3d.systems.RenderSystem` during `Minecraft.main`) —
+expected, not a new regression; verify via the built jar's bundled refmap + a real launcher
+instead, same as 1.18.2.
 
 ### MC 26.x API differences
 

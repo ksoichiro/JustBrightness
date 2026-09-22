@@ -1,0 +1,80 @@
+plugins {
+    id 'net.neoforged.moddev.legacyforge'
+}
+
+legacyForge {
+    version = forge_version
+
+    runs {
+        client {
+            client()
+            // Development runs load resources directly from the output directory,
+            // so the JAR manifest cannot register the Mixin configuration.
+            programArgument "--mixin.config=${mod_id}.mixins.json"
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// Generates the Mixin refmap needed to resolve mixin targets against the
+// reobfuscated (SRG) names used by a real, non-dev Forge installation.
+// Without this, mixins load fine under :runClient (unobfuscated dev names)
+// but fail with "No refMap loaded" in any real launcher.
+mixin {
+    config 'justbrightness.mixins.json'
+    add sourceSets.main, 'justbrightness-refmap.json'
+}
+
+configurations {
+    commonJava {
+        canBeResolved = true
+    }
+    commonResources {
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    compileOnly project(':common')
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'
+
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+sourceSets.main {
+    java {
+        srcDir rootProject.file('common/shared/src/main/java')
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+
+tasks.named('processResources') {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+
+    filesMatching('META-INF/mods.toml') {
+        expand(
+                version: mod_version,
+                minecraft_version: minecraft_version,
+                forge_version: forge_version,
+        )
+    }
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes(
+                'MixinConfigs': 'justbrightness.mixins.json',
+        )
+    }
+}
