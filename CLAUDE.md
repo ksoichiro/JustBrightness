@@ -1,6 +1,6 @@
 # Project: Just Brightness
 
-Minecraft client-side mod that toggles a fullbright-style gamma override. Multi-loader (Fabric, NeoForge, and Forge where available) targeting MC 1.21.1, 1.21.11, 26.1.2, 26.2, and 26.3.
+Minecraft client-side mod that toggles a fullbright-style gamma override. Multi-loader (Fabric, NeoForge, and Forge where available) targeting MC 1.16.5, 1.17.1, 1.18.2, 1.19.2, 1.20.1, 1.21.1, 1.21.3–1.21.11, and 26.1.2, 26.2, 26.3.
 
 ## Build
 
@@ -32,7 +32,14 @@ Build a specific platform for a target Minecraft version:
 - `neoforge/base/` — Shared NeoForge entry points, used **only by 1.21.1**. 1.21.11 needs its
   own copy despite also being a "1.x" MC version — see the note below the API table
 - `fabric/{version}/`, `neoforge/{version}/` — Mod metadata; own Java entry point when base is incompatible
-- `forge/{version}/` — Forge loader module. **No `forge/base` exists or is planned** — every `forge/{version}` always carries its own full entry-point sources (mirrors JustCoordinates, a sibling project using the same architecture)
+- `forge/base/` — Shared Forge entry points, used only by `forge/1.21.11` and the 26.x line
+  (26.1.2/26.2/26.3) via `compileOnly project(':forge-base')`. **1.21.3 through 1.21.10 do NOT use
+  this project** even though most of them also lack their own `src/main/java` — see "MC 1.21.3
+  through 1.21.10" below for why `settings.gradle`'s inclusion rule can't just check for absent
+  sources here.
+- `forge/{version}/` — Forge loader module. Every Forge-enabled version *appears* to carry its own
+  full entry-point sources, but for the 1.21.3–1.21.10 range this is misleading: those `forge/{version}/`
+  directories are mostly empty, and the real sources come from a shared routing script — see below.
 - `forge/{version}/src/main/resources/pack.mcmeta` — **Forge-only requirement.** Forge treats a mod's resources as a vanilla resource pack and requires `pack.mcmeta`; without it Forge logs "failed to load a valid ResourcePackInfo" for the mod's resources and silently drops them, including lang files (so translation keys render raw, e.g. `key.category.justbrightness.justbrightness` in the settings screen). Fabric and NeoForge don't need this file — don't assume it's optional everywhere because it's absent from `fabric/`/`neoforge/`.
   **Trap**: a plain `"pack_format": N` is only accepted by `PackFormat`'s codec (`net/minecraft/server/packs/metadata/pack/PackFormat.java`) when `N` is at or below the current game version's legacy-format cutoff (confirmed 64 for 1.21.11) — above that, Minecraft rejects the pack with "declares support for version newer than 64, but is missing mandatory fields min_format and max_format" (a real in-game error, not a build-time one, so a clean build proves nothing). JustCoordinates' own `pack.mcmeta` files use the plain `pack_format`-only form and are **untested by that project against this validation path** — don't copy them as-is for values this high. Use `min_format`/`max_format` instead (verified against Mojang's own `trade_rebalance` datapack `pack.mcmeta`, extracted from `client.jar`, which uses this exact form): `{"pack": {"description": "...", "min_format": N, "max_format": N}}` with `min_format == max_format == N` for a single supported format (1.21.11→75, 26.1.2→76, 26.2→88).
   **Further trap**: `min_format`/`max_format` alone still wasn't enough for 1.21.11 — a mod's `pack.mcmeta` is validated *twice*, once as `PackType.CLIENT_RESOURCES` (legacy cutoff 64) and once as `PackType.SERVER_DATA` (legacy cutoff 81, a **different, higher** cutoff than the client one — confirmed via `PackFormat.lastPreMinorVersion(PackType)`), against the same file. With `min_format=max_format=75`: the CLIENT_RESOURCES check (75>64) requires `supported_formats` to be **absent** ("is deprecated ... remove it" if present), while the SERVER_DATA check (75≤81) requires `supported_formats` to be **present** (plus a `pack_format` field) — i.e. **the two checks want opposite things and no single file satisfies both**. Both errors are logged every run (confirmed via `./gradlew :forge:runClient`) but appear to be non-fatal — the game keeps running, worlds load — so this is currently left as a **known, unresolved cosmetic issue** rather than chased further; re-derive per-version behavior from `net/minecraft/server/packs/metadata/pack/PackFormat.java` in that version's decompiled vanilla sources rather than assuming these exact numbers carry over.
@@ -42,9 +49,15 @@ Build a specific platform for a target Minecraft version:
   - The `args "--mixin.config=..."` program argument is what makes it work in **`:forge:runClient` / dev-run testing** — dev runs load the mod from a raw output directory (`forge/{version}/build/sourcesSets/main/`, not a jar), so there is no manifest for the agent above to read; Mixin needs the config path as an explicit ModLauncher program argument instead (this is what the now-unsupported MixinGradle plugin used to inject automatically). **Without this, dev-run testing shows zero mixin-related log output at all — no error, no success — because Mixin's `MixinEnvironment` prepares zero configs; confirmed by running with `-Dmixin.debug.verbose=true` and seeing "Preparing mixins for MixinEnvironment[DEFAULT]" followed by nothing.** This was the actual root cause of gamma silently not changing on Forge across three separate testing rounds: the mod loads fine, the toggle keybind and its action-bar message work, `GammaOverrideMixin` just never gets a chance to run.
 - `props/{version}.properties` — Version-specific dependency versions, including `enabled_platforms` (`fabric,neoforge` or `fabric,neoforge,forge`)
 
-`settings.gradle` includes `{platform}-base` only when `{platform}/{version}/src/main/java`
-does not exist, so adding version-specific entry points automatically opts that version out
-of the shared base.
+`settings.gradle` includes `{platform}-base` as its own project only when that version's
+`build.gradle` actually declares `compileOnly project(':{platform}-base')` — **not** merely
+whenever `{platform}/{version}/src/main/java` is empty. The two conditions look equivalent at
+first glance (a version with no own sources normally means "depend on base instead"), and an
+absent-sources check was in fact the original rule, but it breaks for the MC 1.21.3–1.21.10 forge/
+neoforge range, which routes sources through a shared script instead of a base-project dependency
+(see below) — checking `build.gradle`'s text for the dependency line is what actually distinguishes
+"opted out of base via a real entry-point copy" from "opted out of base via some other routing
+mechanism entirely, that doesn't touch `{platform}-base` at all."
 
 ### Entry-point duplication (manual sync required)
 
@@ -63,10 +76,55 @@ hand — there is no automated check:
 all four differ from `base`'s `FMLEnvironment.dist`-using version. Any change to a `*/base/`
 entry point's registration/wiring logic must be mirrored into every non-base copy.
 
-Forge has no shared `base` at all, so `JustBrightnessForge.java` and
-`JustBrightnessForgeClient.java` under `forge/{version}/src/main/java/com/justbrightness/forge/`
-must be kept in sync across every Forge-enabled version the same way (currently 1.21.11, 26.1.2,
-26.2, byte-identical to each other).
+Forge's `forge/base/` is depended on by `forge/1.21.11` and the 26.x line only (26.1.2/26.2/26.3
+byte-identical to each other and to `base`'s own copy). The 1.21.3–1.21.10 range is a separate
+case entirely — see "MC 1.21.3 through 1.21.10" below — it doesn't carry its own entry-point
+copies at all; it borrows 1.21.1's, 1.21.6's, or 1.21.9's via a routing script, so there's nothing
+to manually sync there beyond keeping 1.21.1/1.21.6/1.21.9's own copies correct for whichever other
+versions currently point at them.
+
+### MC 1.21.3 through 1.21.10: routed via a shared script, not the `{platform}-base` pattern
+
+Unlike every other version family in this project, `forge/1.21.3`–`forge/1.21.10` and
+`neoforge/1.21.3`–`neoforge/1.21.10` don't select their Java sources by "own copy vs. depend on
+`{platform}-base`". Instead, every `forge/{version}/build.gradle` in that range is just
+`apply from: rootProject.file('gradle/version-builds/forge-1.21.gradle')` (same for
+`neoforge-1.21.gradle`), and that shared script picks the actual `java.srcDir` with a hardcoded
+`minecraft_version in [...]` table pointing at whichever other version's directory happens to
+share a compatible API:
+
+- Forge: 1.21.3/1.21.4/1.21.5 → `forge/1.21.1/src/main/java` (manual `.addListener()` on
+  `getModEventBus()`/`MinecraftForge.EVENT_BUS`, the oldest style); 1.21.6/1.21.7/1.21.8 →
+  `forge/1.21.6/src/main/java` (`@Mod.EventBusSubscriber`/`@SubscribeEvent` annotations); 1.21.9 →
+  its own `forge/1.21.9/src/main/java` (same annotation style, `TickEvent.ClientTickEvent.Post`
+  renamed); else (1.21.10, and 1.21.11 via a different build.gradle) → `forge/base` (the
+  `RegisterKeyMappingsEvent.BUS.addListener(...)` static-bus style, confirmed via `javap` to only
+  exist starting with the Forge release pinned by 1.21.9/`59.0.5` — 1.21.3 through 1.21.8's Forge
+  has no `BUS` field on these event classes at all).
+- NeoForge: 1.21.9/1.21.10 → `neoforge/1.21.11/src/main/java` (`FMLEnvironment.getDist()`); else →
+  `neoforge/base` (`FMLEnvironment.dist`). The `.dist` field is removed starting with the
+  fancymodloader major version NeoForge 21.9.16-beta pins (confirmed via `javap`:
+  `net.neoforged.fml.loading.FMLEnvironment` has a public `dist` field pre-10.x, only a
+  `getDist()` method from 10.x on) — this is *earlier* than 1.21.11's break documented below, so
+  don't assume 1.21.9/1.21.10 can still use `.dist` just because they're not "the 1.21.11 case".
+
+**Trap (root cause of a real `buildAll` failure, 2026-09-26)**: because 1.21.3/1.21.4/1.21.5/1.21.7/
+1.21.8/1.21.10 (forge) and 1.21.3–1.21.10 (neoforge) have empty `src/main/java`, `settings.gradle`'s
+old absent-sources check included a `{platform}-base` **project** for them too — but nothing in
+the script above depends on that project; it inlines the base directory's sources straight into
+`{platform}` itself via `java.srcDir(...)`. The result was a phantom `{platform}-base` project that
+still had to independently compile (against `{platform}/base`'s sources, targeting whichever API
+generation those happen to require) despite its output being unused, and it failed to compile for
+exactly the versions whose real Forge/NeoForge dependency predates or postdates what `base` was
+written against — aborting the whole `buildAll` run even though the actually-used `{platform}`
+project would have built fine. Fixed by changing `settings.gradle`'s inclusion check to look for
+`compileOnly project(':{platform}-base')` in the version's own `build.gradle` text instead of
+checking for absent sources (see above). **Do not "fix" this kind of failure by adding real
+entry-point source copies under `forge/{version}/src/main/java` for these versions** — that was
+tried first and produces duplicate-class compile errors, because Gradle's default source-set
+convention still picks up `{version}/src/main/java` as a source directory *in addition to* whatever
+`gradle/version-builds/*.gradle` explicitly adds via `java.srcDir(...)`, so both the new copy and
+the routed-to version's copy end up on the same compile classpath.
 
 ### MC 1.21.11 API differences
 

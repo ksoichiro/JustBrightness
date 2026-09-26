@@ -56,12 +56,15 @@ project(':common').projectDir = file("common/${targetMcVersion}")
 enabledPlatforms.each { platform ->
     def platformDir = file("${platform}/${targetMcVersion}")
     def baseDir = file("${platform}/base")
-    def hasOwnSources = !fileTree(new File(platformDir, "src/main/java")) {
-        include '**/*.java'
-    }.isEmpty()
-    // Version-specific modules with Java sources provide their own compatibility
-    // implementation. Modules without Java sources use the platform baseline.
-    if (baseDir.exists() && !hasOwnSources) {
+    def buildFile = new File(platformDir, 'build.gradle')
+    // Some version families (e.g. the 1.21.x forge/neoforge lines) route their Java sources
+    // through a shared gradle/version-builds/*.gradle script instead of depending on the
+    // ${platform}-base project directly, so presence/absence of src/main/java isn't a reliable
+    // signal here. Only include ${platform}-base when the version's own build.gradle actually
+    // depends on it - otherwise it becomes a phantom project that still needs to compile (against
+    // whichever API generation ${platform}/base happens to target) despite nothing using its output.
+    def usesBase = baseDir.exists() && buildFile.exists() && buildFile.text.contains(":${platform}-base")
+    if (usesBase) {
         include "${platform}-base"
         project(":${platform}-base").projectDir = baseDir
     }
