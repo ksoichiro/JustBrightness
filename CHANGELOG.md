@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-27
+
 ### Added
 
 - Fabric and Forge support for Minecraft 1.16.5
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fabric and Forge support for Minecraft 1.18.2
 - Fabric and Forge support for Minecraft 1.19.2
 - Fabric and Forge support for Minecraft 1.20.1
+- Fabric, NeoForge, and Forge support for Minecraft 26.1.2 and 26.2
 - Forge support for Minecraft 1.21.1 and 26.3
 - Fabric, NeoForge, and Forge support for Minecraft 1.21.3 through 1.21.11
 
@@ -29,5 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Open the in-game settings screen from a separate, unbound keybind
 - Configuration stored in `config/justbrightness.toml`
 
-[Unreleased]: https://github.com/ksoichiro/JustBrightness/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ksoichiro/JustBrightness/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ksoichiro/JustBrightness/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ksoichiro/JustBrightness/releases/tag/v0.1.0
